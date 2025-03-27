@@ -112,7 +112,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [Streamlit](https://streamlit.io/)
 - Email functionality powered by Python's `smtplib`
-- Icons provided by [Emoji](https://emojipedia.org/)
 
 ## Support
 
