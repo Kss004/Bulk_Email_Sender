@@ -61,5 +61,3 @@ streamlit run main.py
 4. Go to App Passwords
 5. Generate a new app password for "Mail"
 6. Use this generated password in the application
-
-## Project Structure 
