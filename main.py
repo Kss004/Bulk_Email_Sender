@@ -25,7 +25,28 @@ with st.form("email_form"):
     # Email content
     st.subheader("Email Content")
     subject = st.text_input("Subject")
-    body = st.text_area("Email Body")
+    
+    # Email format selection
+    email_format = st.radio(
+        "Email Format",
+        ["Plain Text", "HTML"],
+        help="Choose whether to send as plain text or HTML formatted email"
+    )
+    
+    # Email body based on format
+    if email_format == "Plain Text":
+        body = st.text_area("Email Body", placeholder="Enter your email content here...")
+    else:
+        st.markdown("**HTML Email Body**")
+        st.markdown("Enter your HTML code below. You can include CSS styling, images, and formatting.")
+        body = st.text_area("HTML Email Body", 
+                           placeholder="<!DOCTYPE html><html><head><title>Your Email</title></head><body><h1>Hello!</h1><p>Your content here...</p></body></html>",
+                           height=400)
+        
+        # Show HTML preview
+        if body:
+            st.subheader("HTML Preview")
+            st.components.v1.html(body, height=400, scrolling=True)
 
     # File upload
     st.subheader("Attachments")
@@ -64,6 +85,7 @@ if submitted:
                     recipient_emails=recipients,
                     subject=subject,
                     body=body,
+                    email_format=email_format.lower().replace(" ", "_"),
                     attachment_path=attachment_paths[0] if attachment_paths else None
                 )
                 st.success("Email sent successfully!")
@@ -89,6 +111,8 @@ with st.expander("How to use"):
 
     3. **Email Content**:
        - Enter the subject and body of your email
+       - Choose between Plain Text or HTML format
+       - For HTML emails, you can include CSS styling and formatting
 
     4. **Attachments**:
        - Upload any files you want to attach
@@ -106,4 +130,32 @@ with st.expander("How to get App Password"):
     4. Go to App Passwords
     5. Generate a new app password for "Mail"
     6. Use this generated password in the app
+    """)
+
+with st.expander("HTML Email Tips"):
+    st.markdown("""
+    **Best Practices for HTML Emails:**
+    
+    1. **Use Inline CSS**: Most email clients strip out `<style>` tags, so use inline styles
+    2. **Table-based Layout**: Use HTML tables for layout as they're more reliable across email clients
+    3. **Responsive Design**: Include viewport meta tag and use responsive CSS
+    4. **Image Hosting**: Host images on a public server and use absolute URLs
+    5. **Fallback Fonts**: Always specify fallback fonts for better compatibility
+    6. **Test Across Clients**: Test your HTML emails in different email clients
+    
+    **Example HTML Structure:**
+    ```html
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your Email Title</title>
+    </head>
+    <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif;">
+        <h1 style="color: #333;">Hello!</h1>
+        <p style="color: #666;">Your content here...</p>
+    </body>
+    </html>
+    ```
     """)

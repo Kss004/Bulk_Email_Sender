@@ -8,16 +8,33 @@ import os
 import mimetypes
 
 
-def send_email(sender_email, sender_password, recipient_emails, subject, body, attachment_path=None):
+def send_email(sender_email, sender_password, recipient_emails, subject, body, email_format="plain_text", attachment_path=None):
     smtp_server = "smtp.gmail.com"
     port = 587  # TLS port
 
     # Create email message
-    msg = MIMEMultipart()
+    msg = MIMEMultipart('alternative')
     msg['From'] = sender_email
     msg['To'] = ", ".join(recipient_emails)  # Join multiple recipients with commas
     msg['Subject'] = subject
-    msg.attach(MIMEText(body, 'plain'))
+    
+    # Determine the MIME type based on email format
+    if email_format == "html":
+        # For HTML emails, create both HTML and plain text versions
+        # Create a simple plain text version from HTML (basic conversion)
+        import re
+        plain_text_body = re.sub(r'<[^>]+>', '', body)  # Remove HTML tags
+        plain_text_body = re.sub(r'\s+', ' ', plain_text_body)  # Clean up whitespace
+        
+        # Attach both HTML and plain text versions
+        text_part = MIMEText(plain_text_body, 'plain')
+        html_part = MIMEText(body, 'html')
+        
+        msg.attach(text_part)
+        msg.attach(html_part)
+    else:
+        # For plain text emails
+        msg.attach(MIMEText(body, 'plain'))
 
     # Attach file if provided
     if attachment_path:
