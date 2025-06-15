@@ -8,15 +8,19 @@ import os
 import mimetypes
 
 
-def send_email(sender_email, sender_password, recipient_emails, subject, body, email_format="plain_text", attachment_path=None):
+def send_email(sender_email, sender_password, to_recipients, cc_recipients=None, bcc_recipients=None, subject="", body="", email_format="plain_text", attachment_path=None):
     smtp_server = "smtp.gmail.com"
     port = 587  # TLS port
 
     # Create email message
     msg = MIMEMultipart('alternative')
     msg['From'] = sender_email
-    msg['To'] = ", ".join(recipient_emails)  # Join multiple recipients with commas
+    msg['To'] = ", ".join(to_recipients)  # Join primary recipients with commas
     msg['Subject'] = subject
+    
+    # Add CC header if CC recipients are provided
+    if cc_recipients:
+        msg['Cc'] = ", ".join(cc_recipients)
     
     # Determine the MIME type based on email format
     if email_format == "html":
@@ -63,13 +67,20 @@ def send_email(sender_email, sender_password, recipient_emails, subject, body, e
         except Exception as e:
             print(f"Error attaching file: {e}")
 
+    # Prepare all recipients for sending (To + CC + BCC)
+    all_recipients = to_recipients.copy()
+    if cc_recipients:
+        all_recipients.extend(cc_recipients)
+    if bcc_recipients:
+        all_recipients.extend(bcc_recipients)
+
     # Connect to SMTP server and send email
     try:
         context = ssl.create_default_context()
         server = smtplib.SMTP(smtp_server, port)
         server.starttls(context=context)
         server.login(sender_email, sender_password)
-        server.sendmail(sender_email, recipient_emails, msg.as_string())
+        server.sendmail(sender_email, all_recipients, msg.as_string())
         server.quit()
         print("Email sent successfully!")
     except Exception as e:
@@ -80,9 +91,11 @@ def send_email(sender_email, sender_password, recipient_emails, subject, body, e
 if __name__ == "__main__":
     sender = "your-email@gmail.com"
     password = "your-app-password"  # Use App Passwords for Gmail security
-    recipients = ["person1@example.com", "person2@example.com", "person3@example.com"]
-    subject = "Test Email"
-    body = "Hello, this is a test email sent using Python!"
+    to_recipients = ["person1@example.com", "person2@example.com"]
+    cc_recipients = ["manager@example.com"]
+    bcc_recipients = ["admin@example.com"]
+    subject = "Test Email with CC and BCC"
+    body = "Hello, this is a test email sent using Python with CC and BCC functionality!"
     attachment = None  # Replace with a file path if needed
 
-    send_email(sender, password, recipients, subject, body, attachment)
+    send_email(sender, password, to_recipients, cc_recipients, bcc_recipients, subject, body, attachment)

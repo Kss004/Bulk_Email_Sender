@@ -18,9 +18,21 @@ with st.form("email_form"):
 
     # Recipients
     st.subheader("Recipients")
-    recipients_text = st.text_area("Recipient Email Addresses",
-                                   placeholder="Enter email addresses separated by commas",
-                                   help="Example: email1@example.com, email2@example.com")
+    
+    # To recipients (primary recipients)
+    to_recipients = st.text_area("To (Primary Recipients)",
+                                 placeholder="Enter email addresses separated by commas",
+                                 help="Example: email1@example.com, email2@example.com")
+    
+    # CC recipients
+    cc_recipients = st.text_area("CC (Carbon Copy)",
+                                 placeholder="Enter email addresses separated by commas (optional)",
+                                 help="Recipients will see who else received the email")
+    
+    # BCC recipients
+    bcc_recipients = st.text_area("BCC (Blind Carbon Copy)",
+                                  placeholder="Enter email addresses separated by commas (optional)",
+                                  help="Recipients won't see who else received the email")
 
     # Email content
     st.subheader("Email Content")
@@ -56,12 +68,14 @@ with st.form("email_form"):
     submitted = st.form_submit_button("Send Email")
 
 if submitted:
-    if not sender_email or not sender_password or not recipients_text or not subject or not body:
-        st.error("Please fill in all required fields!")
+    if not sender_email or not sender_password or not to_recipients or not subject or not body:
+        st.error("Please fill in all required fields (Sender Email, App Password, To recipients, Subject, and Email Body)!")
     else:
         try:
             # Process recipients
-            recipients = [email.strip() for email in recipients_text.split(",")]
+            to_list = [email.strip() for email in to_recipients.split(",") if email.strip()]
+            cc_list = [email.strip() for email in cc_recipients.split(",") if email.strip()] if cc_recipients else []
+            bcc_list = [email.strip() for email in bcc_recipients.split(",") if email.strip()] if bcc_recipients else []
 
             # Handle attachments
             attachment_paths = []
@@ -82,7 +96,9 @@ if submitted:
                 send_email(
                     sender_email=sender_email,
                     sender_password=sender_password,
-                    recipient_emails=recipients,
+                    to_recipients=to_list,
+                    cc_recipients=cc_list,
+                    bcc_recipients=bcc_list,
                     subject=subject,
                     body=body,
                     email_format=email_format.lower().replace(" ", "_"),
@@ -106,8 +122,10 @@ with st.expander("How to use"):
        - Use an App Password from your Google Account settings (for security)
 
     2. **Recipients**:
-       - Enter email addresses separated by commas
-       - Example: email1@example.com, email2@example.com
+       - **To**: Primary recipients (required)
+       - **CC**: Carbon Copy recipients (optional) - recipients can see who else got the email
+       - **BCC**: Blind Carbon Copy recipients (optional) - recipients cannot see who else got the email
+       - Enter email addresses separated by commas for each field
 
     3. **Email Content**:
        - Enter the subject and body of your email
@@ -130,6 +148,26 @@ with st.expander("How to get App Password"):
     4. Go to App Passwords
     5. Generate a new app password for "Mail"
     6. Use this generated password in the app
+    """)
+
+with st.expander("CC vs BCC - Understanding the Difference"):
+    st.markdown("""
+    **CC (Carbon Copy):**
+    - Recipients in the CC field will receive the email
+    - All recipients (To and CC) can see who else received the email
+    - Use CC when you want everyone to know who else is involved
+    - Example: Sending a project update to team members
+
+    **BCC (Blind Carbon Copy):**
+    - Recipients in the BCC field will receive the email
+    - Other recipients cannot see who is in the BCC field
+    - Use BCC for privacy or when sending to large groups
+    - Example: Sending newsletters or announcements to subscribers
+
+    **Best Practices:**
+    - Always use BCC when sending to large groups to protect privacy
+    - Use CC sparingly and only when necessary
+    - Be mindful of email etiquette and privacy concerns
     """)
 
 with st.expander("HTML Email Tips"):
